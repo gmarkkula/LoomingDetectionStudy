@@ -1,0 +1,8 @@
+RecordingStart  254
+RecordingEnd    126
+BlockStart      20x  (200 = practice block; 20x = experimental block 1-5)
+BlockEnd        199
+TrialStart      10x  (car appears on screen; x in 1-4 indicates trial type)
+LoomingStart    15x  (car begins decelerating/looming; x in 1-4 indicates trial type)
+TrialEnd        99
+Response        1
