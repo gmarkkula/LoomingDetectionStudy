@@ -39,13 +39,14 @@ close all force
 c_bDoBasicInit = true;
 c_bDoScalpMaps = true;
 c_bDoParticipantERPs = true;
+c_bSaveEPS = true;
 
 % set to false to double check that hidden axes have correct scaling
 c_bHideAxes = true;
 
 if c_bDoBasicInit
   
-  clearvars -except c_bDoScalpMaps c_bDoParticipantERPs c_bHideAxes
+  clearvars -except c_bDoScalpMaps c_bDoParticipantERPs c_bSaveEPS c_bHideAxes
   close all force
   
   % general constants
@@ -653,3 +654,9 @@ end
 % condition legend
 hConditionLegend.Position = [0.2291    0.2465    0.1486    0.1458];
 
+
+% save EPS
+if c_bSaveEPS
+  fprintf('Saving EPS...\n')
+  SaveFigAsEPSPDF('Fig3.eps')
+end

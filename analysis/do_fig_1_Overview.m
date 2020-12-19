@@ -36,9 +36,10 @@
 % constants for when tweaking the plots
 c_bDoBasicInit = true;
 c_bHideAxes = true;
+c_bSaveEPS = true;
 
 if c_bDoBasicInit
-  clearvars -except c_bHideAxes
+  clearvars -except c_bHideAxes c_bSaveEPS
   close all force
   
   % general constants
@@ -391,3 +392,9 @@ annotation('textbox',...
   'FitBoxToText','off',...
   'EdgeColor','none');
 
+
+% save EPS
+if c_bSaveEPS
+  fprintf('Saving EPS...\n')
+  SaveFigAsEPSPDF('Fig1.eps')
+end

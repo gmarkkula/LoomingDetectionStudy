@@ -34,9 +34,11 @@
 
 
 c_bDoBasicInit = true;
+c_bSaveEPS = true;
+
 if c_bDoBasicInit
   
-  clearvars
+  clearvars -except c_bSaveEPS
   close all force
   
   % general constants
@@ -174,5 +176,10 @@ for iPlotModel = 1:c_nModelsToPlot
 end
 
 
+% save EPS
+if c_bSaveEPS
+  fprintf('Saving EPS...\n')
+  SaveFigAsEPSPDF('FigS1.eps')
+end
 
 

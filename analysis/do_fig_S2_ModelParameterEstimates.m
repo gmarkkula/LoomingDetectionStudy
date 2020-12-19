@@ -31,12 +31,12 @@
 % Open Science Framework repository: https://doi.org/10.17605/OSF.IO/KU3H4
 %
 
-
-
 c_bDoBasicInit = true;
+c_bSaveEPS = true;
+
 if c_bDoBasicInit
   
-  clearvars
+  clearvars -except c_bSaveEPS
   close all force
   
   % constants
@@ -256,6 +256,12 @@ for iModel = 1:c_nModelsToPlot
   
 end % iModel for loop
 
+
+% save EPS
+if c_bSaveEPS
+  fprintf('Saving EPS...\n')
+  SaveFigAsEPSPDF('FigS2.eps')
+end
 
 
 function [iRow, iCol] = SetSubPlot(nPlotParams, iXPlotParam, iYPlotParam)

@@ -36,6 +36,7 @@
 % settings for when working on and tweaking plots
 c_bDoBasicInit = true;
 c_bMakeCDFPlots = true;
+c_bSaveEPS = true;
 
 % set to false to double check that hidden axes have correct scaling
 c_bHideAxes = true;
@@ -43,7 +44,7 @@ c_bHideAxes = true;
 
 if c_bDoBasicInit
   
-  clearvars -except c_bMakeCDFPlots c_bHideAxes
+  clearvars -except c_bMakeCDFPlots c_bSaveEPS c_bHideAxes
   close all force
   
   % general constants
@@ -307,3 +308,9 @@ for i = 1:2
   VhDeltaAICs(i).Position = [x 0.1148 0.10 0.8150];
 end
 
+
+% save EPS
+if c_bSaveEPS
+  fprintf('Saving EPS...\n')
+  SaveFigAsEPSPDF('Fig2.eps')
+end
