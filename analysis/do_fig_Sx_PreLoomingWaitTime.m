@@ -91,13 +91,15 @@ end % iDataSource for loop
 figure(2)
 set(gcf, 'Position', [150 100 0.7*c_nFullWidthFigure_px 270])
 clf
+VAxisLimits = [1 4 -1.5e-4 2e-4];
+c_CsDataSource = {'Data', 'Model'};
 for iDataSource = 1:2
   
   subplot(1, 2, iDataSource)
   set(gca, 'FontSize', c_stdFontSize, 'FontName', c_sFontName)
   hold on
   
-  for iCondition = 1:c_nTrialTypes
+  for iCondition = fliplr(c_ViConditionUrgencyOrder)
     avThetaDotAtResponseInCondition = mean(MAvThetaDotAtResponse(...
       iDataSource, iCondition, :));
     avThetaDotAtResponesDeviationFromConditionAv = ...
@@ -108,10 +110,17 @@ for iDataSource = 1:2
     
   end % iCondition for loop
   
-  axis([1 4 -1.5e-4 2e-4])
+  axis(VAxisLimits)
+  text(3, 0.3e-4, c_CsDataSource{iDataSource}, ...
+    'FontSize', c_annotationFontSize, 'FontName', c_sFontName, ...
+    'VerticalAlignment', 'bottom')
   xlabel('Pre-looming wait time (s)')
   if iDataSource == 1
     ylabel(sprintf('Deviation from condition\naverage d\\theta/dt at response (rad/s)\n'))
   end
   
 end % iDataSource for loop
+
+
+AddLoomingConditionLegend
+hConditionLegend.Position = [0.7675    0.7519    0.2141    0.2102];
