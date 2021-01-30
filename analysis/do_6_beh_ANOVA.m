@@ -171,3 +171,18 @@ for iExclusionApproach = 1:2
   
 end % iExclusionApproach for loop
 
+
+
+%% Check among included participants for responses in catch trials
+
+VbValidCatchTrials = TResponses.iBlock >= 1 & ...
+  TResponses.iStimulusID > 10 & ~TResponses.bParticipantExcluded;
+VbValidCatchTrialsWithResponses = ...
+  VbValidCatchTrials & TResponses.bResponseMade;
+
+nValidCatchTrials = length(find(VbValidCatchTrials));
+nValidCatchTrialsWithResponses = length(find(VbValidCatchTrialsWithResponses));
+fprintf('Detection responses were made in %d (%.2f %%) out of the %d catch trials for participants included in the analyses.\n', ...
+  nValidCatchTrialsWithResponses, ...
+  100 * nValidCatchTrialsWithResponses / nValidCatchTrials, nValidCatchTrials)
+
