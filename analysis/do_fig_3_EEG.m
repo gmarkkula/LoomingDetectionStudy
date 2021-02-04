@@ -98,10 +98,7 @@ c_nSubplotRows = 4;
 c_nSubplotCols = 3;
 
 
-c_VResponseERPXLim_ms = [-1200 500];
-
-
-% get the targeted electrodes
+% get the electrodes used to estimate the CPP
 ViElectrodes = GetElectrodeIndices(...
   SAllTrialData.SEEGChannelLocations, c_CsElectrodesForModelFitting);
 
@@ -165,16 +162,6 @@ if c_bDoParticipantERPs
   %% get stimulus-locked and response-locked average ERPs, and do ANOVAs on
   %  response-locked ERP to test for effect of condition
   
-  
-  % constants for response-locking
-  c_responseERPMinTime = -1;
-  c_responseERPMaxTime = 0.4;
-  c_nPreResponsePlotSamples = round(-c_responseERPMinTime * c_nERPSampleRate);
-  c_nPostResponsePlotSamples = round(c_responseERPMaxTime * c_nERPSampleRate);
-  c_VidxDataRangeAroundResponse = [-c_nPreResponsePlotSamples+1:c_nPostResponsePlotSamples];
-  c_nResponseLockedPlotSamples = length(c_VidxDataRangeAroundResponse);
-  c_VResponseLockedTimes_ms = c_VidxDataRangeAroundResponse * (1000/c_nERPSampleRate);
-  
   % get stimulus- and response-locked ERPs averaged over the targeted
   % electrodes
   nStimulusLockedPlotSamples = size(SAllTrialData.MEEGERP, 2);
@@ -219,9 +206,7 @@ if c_bDoParticipantERPs
   
   
   %% plot the stimulus and response locked ERPs
-  
-  c_VERPYLim = [-2 6];
-  
+    
   for iCondition = 1:c_nTrialTypes
     
     ViConditionEpochs = find(SAllTrialData.ViStimulusID == iCondition);
