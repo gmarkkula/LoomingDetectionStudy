@@ -88,7 +88,22 @@ for iExclusionApproach = 1:2
   
   [p, STable, SStats] = anovan(log(VDependentVariableData), ...
     CVPredictors, 'model', 2, 'random', c_ViRandomEffectPredictors, ...
-    'varnames', c_CsPredictors)
+    'varnames', c_CsPredictors);
+  
+  % get partial eta squared values
+  VSumOfSquares = cell2mat({STable{2:end, 2}})';
+  errorSS = VSumOfSquares(end-1);
+  VFactorSS = VSumOfSquares(1:end-2);
+  VPartialEtaSquared = VFactorSS ./ (VFactorSS + errorSS)
+  
+  % get per-block thetaDot averages
+  for iBlock = 1:5
+    VbRows = TResponses.iBlock == iBlock;
+    fprintf('Average thetaDot at response in block %d: %.5f rad/s\n', iBlock, ...
+      mean(TResponses.carOpticalExpansionRateAtResponse(VbRows)))
+  end
+  fprintf('Grand total average thetaDot at response: %.5f rad/s\n', iBlock, ...
+      mean(TResponses.carOpticalExpansionRateAtResponse))
   
   
   
