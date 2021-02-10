@@ -126,7 +126,7 @@ figure(2)
 set(gcf, 'Position', [150 100 0.7*c_nFullWidthFigure_px 270])
 clf
 VAxisLimits = [1 4 -1.5e-4 2e-4];
-c_CsDataSource = {'Data', 'Model'};
+c_CsDataSource = {'Data', 'Model AV'};
 for iDataSource = 1:2
   
   subplot(1, 2, iDataSource)
