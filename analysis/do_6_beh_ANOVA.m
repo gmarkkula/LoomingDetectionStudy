@@ -188,10 +188,10 @@ end % iExclusionApproach for loop
 
 
 
-%% Check among included participants for responses in catch trials
+%% Check for responses in catch trials
 
 VbValidCatchTrials = TResponses.iBlock >= 1 & ...
-  TResponses.iStimulusID > 10 & ~TResponses.bParticipantExcluded;
+  TResponses.iStimulusID > 10;%& ~TResponses.bParticipantExcluded;
 VbValidCatchTrialsWithResponses = ...
   VbValidCatchTrials & TResponses.bResponseMade;
 
