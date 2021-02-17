@@ -84,6 +84,17 @@ c_VRTCDFLegendIllustrationRGB = [1 1 1] * .7;
 c_VRTCDFXLim = [0.5 3.8];
 c_VRTCDFYLim = [-.1 1.1];
 
+c_VResponseERPXLim_ms = [-1200 500];
+c_VERPYLim = [-2 6];
+% constants for response-locking
+c_responseERPMinTime = -1;
+c_responseERPMaxTime = 0.4;
+c_nPreResponsePlotSamples = round(-c_responseERPMinTime * c_nERPSampleRate);
+c_nPostResponsePlotSamples = round(c_responseERPMaxTime * c_nERPSampleRate);
+c_VidxDataRangeAroundResponse = [-c_nPreResponsePlotSamples+1:c_nPostResponsePlotSamples];
+c_nResponseLockedPlotSamples = length(c_VidxDataRangeAroundResponse);
+c_VResponseLockedTimes_ms = c_VidxDataRangeAroundResponse * (1000/c_nERPSampleRate);
+
 c_MScalpMapColors = [...
     0.1320    0.3520    0.4520
     0.1461    0.3838    0.4689

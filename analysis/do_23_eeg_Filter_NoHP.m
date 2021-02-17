@@ -32,8 +32,7 @@
 %
 
 
-% loads the rereferenced per-participant EEG data, applies band pass
-% filtering, then saves new per-participant .MAT files
+% like do_4... but without the high-pass filtering
 
 clearvars
 close all
@@ -73,11 +72,11 @@ for iEEGFile = 1:length(SEEGFiles)
   SEEGRereferenced.etc.noiseDetection.reference = 'removed to save space - see earlier step in analysis pipeline';
   
   % apply filters
-  SEEGLPFiltered = pop_firws(SEEGRereferenced, 'fcutoff', 45, 'ftype', 'lowpass', 'wtype', 'kaiser', 'warg', 5.65326, 'forder', 372, 'minphase', 0);
-  SEEGFiltered = pop_firws(SEEGLPFiltered, 'fcutoff', 0.1, 'ftype', 'highpass', 'wtype', 'kaiser', 'warg', 5.65326, 'forder', 1856, 'minphase', 0);
+  SEEGFiltered = pop_firws(SEEGRereferenced, 'fcutoff', 45, 'ftype', 'lowpass', 'wtype', 'kaiser', 'warg', 5.65326, 'forder', 372, 'minphase', 0);
+  %SEEGFiltered = pop_firws(SEEGLPFiltered, 'fcutoff', 0.1, 'ftype', 'highpass', 'wtype', 'kaiser', 'warg', 5.65326, 'forder', 1856, 'minphase', 0);
   
   % save .mat file
   fprintf('Saving MAT file...\n')
-  save([c_sEEGAnalysisDataPath sprintf(c_sFilteredFileNameFormat, sParticipantID)], 'SEEGFiltered')
+  save([c_sEEGAnalysisDataPath sprintf(c_sLPFilteredFileNameFormat, sParticipantID)], 'SEEGFiltered')
   
 end % iLogFile

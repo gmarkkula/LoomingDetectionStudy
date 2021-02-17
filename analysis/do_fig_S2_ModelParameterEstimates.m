@@ -74,6 +74,7 @@ c_VMLESymbolColor = [1 1 1] * 0.5;
 
 for iModel = 1:c_nModelsToPlot
   sModel = c_CsModelsToPlot{iModel};
+  fprintf('Model %s...\n', sModel)
   
   % get some basic info about how this model was fitted
   CsFreeParameterNames = SABCPosteriors.(sModel).CsFreeParameterNames;
@@ -190,6 +191,10 @@ for iModel = 1:c_nModelsToPlot
           for i = 1:length(VX)
             plot(VX([i i]), VYRug, '-', 'Color', c_VMLESymbolColor, 'LineWidth', 1);
           end
+          % print out average MLE-fitted value
+          fprintf('\tAverage MLE-fitted %s = %.4g\n', ...
+            CsFreeParameterNames{ViPlotParams(iXPlotParam)}, ...
+            mean(VX))
           
         elseif iXPlotParam < iYPlotParam
           
@@ -257,11 +262,6 @@ for iModel = 1:c_nModelsToPlot
 end % iModel for loop
 
 
-% save EPS
-if c_bSaveEPS
-  fprintf('Saving EPS...\n')
-  SaveFigAsEPSPDF('FigS2.eps')
-end
 
 
 function [iRow, iCol] = SetSubPlot(nPlotParams, iXPlotParam, iYPlotParam)

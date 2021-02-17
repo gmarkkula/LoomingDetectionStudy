@@ -72,7 +72,7 @@ close all force
 c_VLambleEtAlThresholdPerCondition = [NaN  0.0037  NaN 0.00215]; % rad/s
 
 c_nParadigmPanels = 3;
-c_nPanels = 4 + c_SExperiment.nConditions + c_nParadigmPanels;
+c_nPanels = 5 + c_SExperiment.nConditions + c_nParadigmPanels;
 c_minThetaDot = -0.001;
 c_maxThetaDot = 0.008;
 c_maxThetaDotForTrace = 0.006;
@@ -126,10 +126,11 @@ set(gca, 'YAxisLocation', 'right')
 set(gca, 'Box', 'off')
 set(gca, 'XTick', c_VTimeTicks)
 if c_bHideAxes
+  set(gca, 'XColor', 'none')
   set(gca, 'YColor', 'none')
 end
-xlabel('Time relative looming onset (s)', 'FontSize', c_annotationFontSize, ...
-  'FontName', c_sFontName)
+%xlabel('Time relative looming onset (s)', 'FontSize', c_annotationFontSize, ...
+%  'FontName', c_sFontName)
 
 
 % looming axes panel
@@ -235,10 +236,12 @@ set(gca, 'XLim', [0 c_loomingTraceMaxTime])
 set(gca, 'YLim', [0 1.2])
 set(gca, 'XTick', c_VTimeTicks)
 if c_bHideAxes
+  set(gca, 'XColor', 'none')
   set(gca, 'YColor', 'none')
 end
 set(gca, 'XTickLabel', [])
 set(gca, 'box', 'off')
+
 
 
 % looming threshold panel
@@ -296,7 +299,7 @@ end % iUrgency for loop
 
 
 % paradigm panels
-c_paradigmYNudge = -0.1;
+c_nudgeDown = 0.15;
 for i = 1:c_nParadigmPanels
   VhParadigmPanel(i) = subplot(1, ...
     c_nPanels, 4 + c_SExperiment.nConditions + i);
@@ -307,11 +310,11 @@ for i = 1:c_nParadigmPanels
   set(gca, 'box', 'on')
 end
 annotation('doublearrow',[0.0103092783505155 0.0800951625693894],...
-  [0.47 0.4375]);
+  [0.47 0.4375]-c_nudgeDown);
 annotation('doublearrow',[0.0856463124504362 0.15543219666931],...
-  [0.4325 0.40]);
+  [0.4325 0.40]-c_nudgeDown);
 annotation('textbox',...
-  [0.0295487708168121 0.4075 0.03 0.0550660792951543],...
+  [0.0295487708168121 0.4075-c_nudgeDown 0.03 0.0550660792951543],...
   'String',{'3 s'},...
   'HorizontalAlignment','center',...
   'FitBoxToText','off',...
@@ -319,7 +322,7 @@ annotation('textbox',...
   'FontSize', c_stdFontSize, ...
   'FontName', c_sFontName);
 annotation('textbox',...
-  [0.082 0.355 0.07 0.0550660792951542],...
+  [0.082 0.355-c_nudgeDown 0.07 0.0550660792951542],...
   'String','1.5 - 3.5 s',...
   'HorizontalAlignment','center',...
   'FitBoxToText','off',...
@@ -327,6 +330,26 @@ annotation('textbox',...
   'FontSize', c_stdFontSize, ...
   'FontName', c_sFontName);
   
+
+
+% time axes panel
+hTimeAxesPanel = subplot(1, c_nPanels, c_nPanels);
+set(gca, 'FontSize', c_stdFontSize, 'FontName', c_sFontName)
+hold on
+set(gca, 'XLim', [0 c_loomingTraceMaxTime])
+set(gca, 'TickDir', 'both')
+set(gca, 'Box', 'off')
+set(gca, 'XTick', c_VTimeTicks)
+text(2.7, 1.2, sprintf('Time relative looming onset (s)'), ...
+  'FontSize', c_annotationFontSize, 'FontName', c_sFontName)
+% set(gca, 'YTick', 0:0.001:0.007)
+% set(gca, 'YTickLabel', {'0' '' '0.002' '' '0.004' '' '0.006' ''})
+set(gca, 'TickLength', [0.01 0.02])
+if c_bHideAxes
+  set(gca, 'YColor', 'none')
+end
+
+
 
 
 % add legend
@@ -337,16 +360,18 @@ AddLoomingConditionLegend
 set(gcf, 'Position', [50 100 c_nFullWidthFigure_px 400])
 set(gcf, 'Color', 'w')
 
-set(hLoomingTracePanel, 'Position', [0.2109 0.1200 0.3955 0.4950]);
-set(hLoomingAxesPanel, 'Position', [0.6482 0.1925 0.0163 0.4875])
+c_nudgeRight = 0.02;
+set(hLoomingTracePanel, 'Position', [0.2109 0.1200-c_nudgeDown 0.3955 0.4950]);
+set(hTimeAxesPanel, 'Position', [0.2109 0.65 0.3955 0.0400]);
+set(hLoomingAxesPanel, 'Position', [0.6482+c_nudgeRight/2 0.1925-c_nudgeDown 0.0163 0.4875])
 set(hAccPanel, 'Position', [0.2109 0.7550 0.3955 0.1150])
 set(hRTPanel, 'Position', [0.2109 0.87 0.3955 0.1375])
-c_firstX = 0.7391;
-c_lastX = 0.9174;
+c_firstX = 0.7391 + c_nudgeRight;
+c_lastX = 0.9174 + c_nudgeRight;
 for i = 1:c_SExperiment.nConditions
   x = c_firstX + ((i-1) / (c_SExperiment.nConditions - 1)) * ...
     (c_lastX - c_firstX);
-  set(VhThetaDotPanels(i), 'Position', [x 0.1200 0.0522 0.6338])
+  set(VhThetaDotPanels(i), 'Position', [x 0.1200-c_nudgeDown 0.0522 0.6338])
 end
 c_firstX = 0.0091;
 c_lastX = 0.1609;
@@ -358,14 +383,15 @@ c_axesHeight = c_axesWidth * c_imageHToW;
 for i = 1:c_nParadigmPanels
   x = c_firstX + ((i-1) / (c_nParadigmPanels - 1)) * (c_lastX - c_firstX);
   y = c_firstY + ((i-1) / (c_nParadigmPanels - 1)) * (c_lastY - c_firstY);
-  set(VhParadigmPanel(i), 'Position', [x y 0.1009 0.2175])
+  set(VhParadigmPanel(i), 'Position', [x y-c_nudgeDown 0.1009 0.2175])
 end
-hConditionLegend.Position = [0.0364 0.1150 0.1355 0.1800];
+%hConditionLegend.Position = [0.0364 0.1150-c_nudgeDown 0.1355 0.1800];
+hConditionLegend.Position = [0.8082 0.7250 0.1355 0.1800];
 
 
 % panel labels
 annotation('textbox',...
-  [0.13 0.69 0.0245036406892076 0.0770925093721189],...
+  [0.13 0.69-c_nudgeDown 0.0245036406892076 0.0770925093721189],...
   'String',{'A'},...
   'HorizontalAlignment','center',...
   'FontWeight','bold',...
@@ -383,7 +409,7 @@ annotation('textbox',...
   'FitBoxToText','off',...
   'EdgeColor','none');
 annotation('textbox',...
-  [0.731 0.76 0.0245036406892076 0.0770925093721186],...
+  [0.731 0.76-c_nudgeDown 0.0245036406892076 0.0770925093721186],...
   'String','C',...
   'HorizontalAlignment','left',...
   'FontWeight','bold',...

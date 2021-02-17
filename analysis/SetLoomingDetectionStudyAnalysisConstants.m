@@ -41,7 +41,7 @@ c_sRawDataBasePath = 'D:\Looming detection study data\';
 c_sResponseLogFilePath = [c_sRawDataBasePath 'behaviour\']; % raw response data files
 c_sBioSemiLogFilePath = [c_sRawDataBasePath 'eeg biosemi\']; % raw Biosemi files
 % -- location for intermediate EEG processing steps (quite large files)
-c_sEEGAnalysisDataPath = 'C:\DATA\WT ISSF\2 Looming detection study\eeg analysis steps\';
+c_sEEGAnalysisDataPath = 'D:\Looming detection study data\eeg data analysis steps\';
 c_sPREPReportPath = [c_sEEGAnalysisDataPath 'PREP reports\'];
 % -- location for plots and analysis results (intermediate and final)
 c_sAnalysisPlotPath = 'analysis plots\';
@@ -58,12 +58,14 @@ c_VidxParticipantIDInRereferencedFileName = ...
 c_sFilteredFileNameFormat = 'EEG_3_filtered_%s.mat';
 c_VidxParticipantIDInFilteredFileName = ...
   GetParticipantIDRangeInFileNameFormat(c_sFilteredFileNameFormat);
+c_sLPFilteredFileNameFormat = 'EEG_3b_lpfiltered_%s.mat';
 c_sICAFileNameFormat = 'EEG_4_ICAweights_%s.mat';
 % -- reports
 c_sPREPSummaryFileNameFormat = 'PREPSummary_%s.html';
 c_sPREPReportFileNameFormat = 'PREPReport_%s.pdf';
 % -- collated data sets
 c_sAllTrialDataFileName = 'AllTrialData.mat';
+c_sAllTrialDataFilterVariantsFileName = 'AllTrialData_FilterVariants.mat';
 c_sModelFittingDataFileName = 'ModelFittingData.mat';
 % -- models
 c_sLambleEtAlDerivedPriorsFileName = ...
