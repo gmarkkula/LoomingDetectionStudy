@@ -1,6 +1,8 @@
 This is MATLAB code for analysing behavioural and EEG data obtained using the looming detection paradigm described in the `README.md` files in the root of this repository, and in the paper linked from there. The paper also provides a full description of the analyses implemented here.
 
-Parts of the analysis code makes use of EEGLAB functions (the code is verified to work with v14.1.1b); for EEGLAB download and installation instructions see here: https://sccn.ucsd.edu/eeglab/index.php
+The EEG data post-processing and figure plotting code makes use of functions from:
+* EEGLAB (we used v14.1.1b); for EEGLAB download and installation instructions see here: https://sccn.ucsd.edu/eeglab/index.php
+* PREP (we used v0.55.3); for PREP download and installation instructions see here: http://vislab.github.io/EEG-Clean-Tools/
 
 # Example use cases of this analysis code
 
