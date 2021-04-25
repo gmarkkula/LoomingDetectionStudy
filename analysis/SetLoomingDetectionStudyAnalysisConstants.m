@@ -67,6 +67,8 @@ c_sPREPReportFileNameFormat = 'PREPReport_%s.pdf';
 c_sAllTrialDataFileName = 'AllTrialData.mat';
 c_sAllTrialDataFilterVariantsFileName = 'AllTrialData_FilterVariants.mat';
 c_sModelFittingDataFileName = 'ModelFittingData.mat';
+c_sModelFittingDataFilterVariantsFileName = ...
+  'ModelFittingData_FilterVariants.mat';
 % -- models
 c_sLambleEtAlDerivedPriorsFileName = ...
   'UniformPriorsFromLambleEtAlStudyFits.mat';
@@ -75,12 +77,15 @@ c_sModelFitAnalysisResultsMATFileName = ...
 c_sBayesFactorsMATFileName = 'BayesFactors.mat';
 c_sABCPosteriorsMATFileName = 'ABCPosteriors.mat';
 c_sCPPOnsetMATFileName = 'CPPOnsetResults.mat';
+c_sCPPOnsetFilterVariantsMATFileName = 'CPPOnsetResults_FilterVariants.mat';
 c_sMLFittingMATFileName = 'MLFittingResults.mat';
+c_sMLFittingFilterVariantsMATFileName = 'MLFittingResults_FilterVariants.mat';
 c_sLikelihoodTestsMATFileName = 'LikelihoodTestResults.mat';
 c_sSimulationsForFigsMATFileName = 'MLESimulationsForFigures.mat';
 c_sSimulationsForERPFigsMATFileName = 'MLESimulationsForERPFigures.mat';
 c_sABCSimulationsForFigsMATFileName = 'ABCSimulationsForFigures.mat';
 c_sCPPRelOnsetDiffsMATFileName = 'CPPRelOnsetDiffs.mat';
+c_sCPPRelOnsetDiffsFilterVariantsMATFileName = 'CPPRelOnsetDiffs_FilterVariants.mat';
 c_sResponseLockedERPMATFileName = 'ResponseLockedERPs.mat';
 
 % general stuff
@@ -140,6 +145,9 @@ c_CsElectrodesForModelFitting = {'CPz', 'Pz', 'POz', 'P1', 'P2'};
 c_nTrialsPerAverageForCPPOnset = 5;
 c_probeTimeForCPPEffectSizeThreshold = -0.5;
 c_requiredERPPeakCohensDForCPPAnalysis = 0.3;
+
+% CPP onset definition
+c_cppOnsetERPFraction = 0.3;
 
 % different response types models can be fitted to
 c_nResponseTypes = 2;
