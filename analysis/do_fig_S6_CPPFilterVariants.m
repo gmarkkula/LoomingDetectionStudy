@@ -31,26 +31,30 @@
 % Open Science Framework repository: https://doi.org/10.17605/OSF.IO/KU3H4
 %
 
-clearvars
 close all
 
-SetLoomingDetectionStudyAnalysisConstants
-SetPlottingConstants
-
-c_nFilterVariants = 2;
-
+c_bDoBasicInit = true;
 c_bDoANOVA = true;
 c_bHideAxes = true;
 
-%%
+%
 
-disp('Loading data...')
-load([c_sAnalysisResultsPath c_sAllTrialDataFilterVariantsFileName])
-load([c_sAnalysisResultsPath c_sCPPOnsetFilterVariantsMATFileName])
-load([c_sAnalysisResultsPath c_sCPPRelOnsetDiffsFilterVariantsMATFileName])
+if c_bDoBasicInit
+  
+  clearvars -except c_bDoANOVA c_bHideAxes
+  
+  SetLoomingDetectionStudyAnalysisConstants
+  SetPlottingConstants
+  disp('Loading data...')
+  load([c_sAnalysisResultsPath c_sAllTrialDataFilterVariantsFileName])
+  load([c_sAnalysisResultsPath c_sCPPOnsetFilterVariantsMATFileName])
+  load([c_sAnalysisResultsPath c_sCPPRelOnsetDiffsFilterVariantsMATFileName])
+  
+end
 
+c_nFilterVariants = 2; % wrt ERP filtering: LP+HP, LP only
 
-%%
+%
 
 % get the electrodes used to estimate CPP
 ViElectrodes = GetElectrodeIndices(...
@@ -119,7 +123,7 @@ if c_bDoANOVA
 end
 
 
-%% plot the stimulus and response locked ERPs
+% plot the stimulus and response locked ERPs
 
 figure(1)
 clf
@@ -131,7 +135,7 @@ for iFilterVariant = 1:c_nFilterVariants
     
     ViConditionEpochs = find(SAllTrialData.ViStimulusID == iCondition);
     
-    for iLock = 1:2 % plot stimulus- and response-locked ERP
+    for iLock = 2 % plot [stimulus- and] response-locked ERP
       
       switch iLock
         case 1
@@ -147,8 +151,7 @@ for iFilterVariant = 1:c_nFilterVariants
           MERPData(iCondition, :) = VERPData;
       end
       
-      VhPlot(iFilterVariant, iLock) = ...
-        subplotGM(c_nFilterVariants, 3, iFilterVariant, iLock);
+      VhPlot(iFilterVariant, 1) = subplotGM(2, 3, iFilterVariant, 1);
       if iCondition == 1
         cla
       end
@@ -171,9 +174,13 @@ for iFilterVariant = 1:c_nFilterVariants
         
         set(gca, 'XLim', VXLim)
         set(gca, 'YLim', c_VERPYLim + [-1 2])
-        h = plot([0 0], get(gca, 'YLim'), 'k-', 'LineWidth', c_stdLineWidth/2);
+        h = plot([0 0], get(gca, 'YLim'), '-', 'LineWidth', c_stdLineWidth/2, ...
+          'Color', [1 1 1] * 0.7);
         uistack(h, 'bottom')
-        if iFilterVariant == 1
+        h = plot(get(gca, 'XLim'), [0 0], '-', 'LineWidth', c_stdLineWidth/2, ...
+          'Color', [1 1 1] * 0.7);
+        uistack(h, 'bottom')
+        if iFilterVariant == 2
           xlabel(sprintf('\nTime relative %s (ms)', sLabel), ...
             'FontSize', c_annotationFontSize, 'FontName', c_sFontName)
         end
@@ -191,12 +198,19 @@ end % iFilterVariant for loop
 
 
 
-%% plot estimated CPP onsets relative to the response
+% plot estimated CPP onsets relative to the response
 
+c_nFilterVariants = 3; % wrt CPP onset estimation: LPHP, LP, LP w abs threshold onset estimation
 for iFilterVariant = 1:c_nFilterVariants
   
-  VhPlot(iFilterVariant, 3) = ...
-    subplotGM(c_nFilterVariants, 3, iFilterVariant, 3);
+  iPlotRow = min(iFilterVariant, 2);
+  if iFilterVariant == 3
+    iPlotCol = 3;
+  else
+    iPlotCol = 2;
+  end
+  VhPlot(iPlotRow, iPlotCol) = ...
+    subplotGM(2, 3, iPlotRow, iPlotCol);
   set(gca, 'FontSize', c_stdFontSize, 'FontName', c_sFontName)
   hold on
   
@@ -217,12 +231,12 @@ for iFilterVariant = 1:c_nFilterVariants
     VnBinDensities = VnBinCounts / sum(VnBinCounts);
     scatterBaseY = iUrgency * c_unitDistance * 2;
     pdfBaseY = scatterBaseY + 0.5 * c_unitDistance;
-    [VDensity, VDensityPoints] = ksdensity(VRelCPPOnsets_ms, 'support', [-1000 0]);
+    [VDensity, VDensityPoints] = ksdensity(VRelCPPOnsets_ms, 'support', [-1005 5]);
     hLine = fill(VDensityPoints, pdfBaseY + VDensity / c_unitDistance, ...
       '-', 'LineWidth', c_stdLineWidth/2, 'EdgeColor', 0.8 * c_CMConditionRGB{iCondition}, ...
       'FaceColor', c_CMConditionRGB{iCondition}, 'FaceAlpha', 0.8);
     
-    scatter(VRelCPPOnsets_ms + randn(size(VRelCPPOnsets_ms)) * c_jitterX,  ...
+    scatter(min(0, VRelCPPOnsets_ms + randn(size(VRelCPPOnsets_ms)) * c_jitterX),  ...
       scatterBaseY + randn(size(VRelCPPOnsets_ms)) * c_jitterY, ...
       5, 'MarkerEdgeColor', 'none', 'MarkerFaceColor', c_CMConditionRGB{iCondition}, ...
       'MarkerFaceAlpha', 0.5)
@@ -244,10 +258,10 @@ for iFilterVariant = 1:c_nFilterVariants
   plot(VObservedRange * 1000, ...
     [1 1] * c_unitDistance * .7, 'k-', 'LineWidth', c_stdLineWidth * 3)
   
-  if iFilterVariant == 1
+  if iPlotRow == 2
     xlabel(sprintf('\nCPP onset time rel. response (ms)'))
   end
-  set(gca, 'XLim', [-1000 50])
+  set(gca, 'XLim', [-1050 50])
   set(gca, 'YLim', [-.25 10] * c_unitDistance)
   if c_bHideAxes
     set(gca, 'YColor', 'none')
@@ -256,28 +270,38 @@ for iFilterVariant = 1:c_nFilterVariants
 end
 
 
-%% panel position and labels
-for iFilterVariant = 1:c_nFilterVariants
-  for iLock = 1:3
-    VhPlot(iFilterVariant, iLock).Position = ...
-      [0.10 + (iLock-1) * 0.30  0.18 + (iFilterVariant-1) * 0.48  0.21  0.28];
-    annotation('textbox',...
-      [0.05 + (iLock-1) * 0.30  0.89 - (iFilterVariant-1) * 0.48  0.07 0.12],...
-      'String', char(int8('A') + iLock-1 + 3*(iFilterVariant-1)), ...
-      'FontSize', c_panelLabelFontSize, 'FontName', c_sFontName, ...
-      'FontWeight', 'bold', 'EdgeColor', 'none');
+% panel labels
+
+% loop through the subplots, skipping the empty panel
+iPanel = 1;
+iRow = 1;
+iCol = 1;
+while iPanel <= 5
+  while isempty(fieldnames(VhPlot(iRow, iCol)))
+    [iRow, iCol] = NextPanel(iRow, iCol);
   end
+  VPanelPos = VhPlot(iRow, iCol).Position;
+  x = VPanelPos(1) - 0.05;
+  if iCol > 1
+    x = x + 0.02;
+  end
+  y = VPanelPos(2) + VPanelPos(4) - 0.05;
+  sLabel = char(int8('A') + iPanel - 1);
+  annotation('textbox',...
+    [x y 0.07 0.12],...
+    'String', sLabel, 'FontSize', c_panelLabelFontSize, 'FontName', c_sFontName, ...
+    'FontWeight', 'bold', 'EdgeColor', 'none');
+  iPanel = iPanel + 1;
+  [iRow, iCol] = NextPanel(iRow, iCol);
 end
-% 
-% % panel labels
-% % A
-% annotation('textbox',...
-%   [0.01 0.89 0.07 0.12],...
-%   'String', 'A', 'FontSize', c_panelLabelFontSize, 'FontName', c_sFontName, ...
-%   'FontWeight', 'bold', 'EdgeColor', 'none');
-% % B
-% annotation('textbox',...
-%   [0.01 0.89-0.48 0.07 0.12],...
-%   'String', 'B', 'FontSize', c_panelLabelFontSize, 'FontName', c_sFontName, ...
-%   'FontWeight', 'bold', 'EdgeColor', 'none');
+
+function [iRow, iCol] = NextPanel(iRow, iCol)
+iCol = iCol + 1;
+if iCol > 3
+  iCol = 1;
+  iRow = iRow + 1;
+end
+end
+
+
 

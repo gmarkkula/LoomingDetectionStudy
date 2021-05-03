@@ -1,4 +1,4 @@
-9
+
 % Copyright 2020 Gustav Markkula
 %
 % Permission is hereby granted, free of charge, to any person obtaining a
@@ -60,7 +60,7 @@ if c_bDoLoadingAndVincentising
       case 2
         % -- CPP onset results
         load([c_sAnalysisResultsPath c_sCPPOnsetFilterVariantsMATFileName])
-        SCPPOnsetResults = SCPPOnsetResults(2);
+        SCPPOnsetResults = SCPPOnsetResults(2); % no HP filtering
         % - ML fitting results
         load([c_sAnalysisResultsPath c_sMLFittingFilterVariantsMATFileName], ...
           'c_CsModels', 'SResults', 'c_VContaminantFractions')
@@ -190,6 +190,12 @@ for iFilterVariant = 1:2 % main approach in paper vs without HP filtering
     if iModel == 1
       ylabel(sprintf('CDF\n'), 'FontSize', c_annotationFontSize, ...
         'FontName', c_sFontName)
+      VAxPosition = get(gca, 'Position');
+      sLabel = char(int8('A') + iFilterVariant - 1);
+      annotation('textbox',...
+        [VAxPosition(1) - 0.07  VAxPosition(2) + VAxPosition(4) - 0.03  0.07 0.12],...
+        'String', sLabel, 'FontSize', c_panelLabelFontSize, 'FontName', c_sFontName, ...
+        'FontWeight', 'bold', 'EdgeColor', 'none');
     elseif iModel == 2 && iFilterVariant == 2
       xlabel(sprintf('\nCPP onset time relative stimulus (s)'), ...
         'FontSize', c_annotationFontSize, 'FontName', c_sFontName)

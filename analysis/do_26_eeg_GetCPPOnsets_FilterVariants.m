@@ -55,18 +55,26 @@ idxResponseSample = c_SSettings.SResponseERP.idxResponseSample;
 
 % loop over filter variants, and create one whole SCPPOnsetResults for each
 % variant (a little wasteful, but easier to implement)
-c_CsFilterVariants = {'LPHP', 'LP'};
+c_CsFilterVariants = {'LPHP', 'LP', 'LPABS'};
 c_nFilterVariants = length(c_CsFilterVariants);
 for iFilterVariant = 1:c_nFilterVariants
   
+  if iFilterVariant == 3
+    % Method LPABS uses the LP-filtered data, which is filter variant 2 in the
+    % model fitting data struct
+    iObsFilterVariant = 2;
+  else
+    iObsFilterVariant = iFilterVariant;
+  end
+  
   % prepare output vectors
-  SCPPOnsetResults(iFilterVariant).ViDataSet = NaN * ones(size(SObservations(iFilterVariant).VResponseTime));
-  SCPPOnsetResults(iFilterVariant).ViCondition = NaN * ones(size(SObservations(iFilterVariant).VResponseTime));
-  SCPPOnsetResults(iFilterVariant).VCPPRelOnsetTime = NaN * ones(size(SObservations(iFilterVariant).VResponseTime));
-  SCPPOnsetResults(iFilterVariant).VCPPOnsetTime = NaN * ones(size(SObservations(iFilterVariant).VResponseTime));
-  SCPPOnsetResults(iFilterVariant).VbHasCPPOnsetTime = NaN * ones(size(SObservations(iFilterVariant).VResponseTime));
-  SCPPOnsetResults(iFilterVariant).VAveragedResponseTime = NaN * ones(size(SObservations(iFilterVariant).VResponseTime));
-  SCPPOnsetResults(iFilterVariant).VAveragedThetaDotAtResp = NaN * ones(size(SObservations(iFilterVariant).VResponseTime));
+  SCPPOnsetResults(iFilterVariant).ViDataSet = NaN * ones(size(SObservations(iObsFilterVariant).VResponseTime));
+  SCPPOnsetResults(iFilterVariant).ViCondition = NaN * ones(size(SObservations(iObsFilterVariant).VResponseTime));
+  SCPPOnsetResults(iFilterVariant).VCPPRelOnsetTime = NaN * ones(size(SObservations(iObsFilterVariant).VResponseTime));
+  SCPPOnsetResults(iFilterVariant).VCPPOnsetTime = NaN * ones(size(SObservations(iObsFilterVariant).VResponseTime));
+  SCPPOnsetResults(iFilterVariant).VbHasCPPOnsetTime = NaN * ones(size(SObservations(iObsFilterVariant).VResponseTime));
+  SCPPOnsetResults(iFilterVariant).VAveragedResponseTime = NaN * ones(size(SObservations(iObsFilterVariant).VResponseTime));
+  SCPPOnsetResults(iFilterVariant).VAveragedThetaDotAtResp = NaN * ones(size(SObservations(iObsFilterVariant).VResponseTime));
   
   % loop through participants and conditions
   nTotalAveragedRTs = 0;
@@ -74,14 +82,21 @@ for iFilterVariant = 1:c_nFilterVariants
     fprintf('.')
     figure(iFilterVariant * 100 + iParticipant)
     clf
+    % get the average ERP amplitude at response across all conditions for
+    % this participant
+    VidxParticipantRows = find(SObservations(iObsFilterVariant).ViDataSet == ...
+      iParticipant);
+    avERPAtResponse = mean(SObservations(iObsFilterVariant).SResponseERP.MERPs(...
+      VidxParticipantRows, idxResponseSample));
+    % loop through conditions
     for iCondition = 1:c_nTrialTypes
-      VidxTrialRows = find(SObservations(iFilterVariant).ViDataSet == iParticipant & ...
-        SObservations(iFilterVariant).ViCondition == iCondition);
+      VidxTrialRows = find(SObservations(iObsFilterVariant).ViDataSet == iParticipant & ...
+        SObservations(iObsFilterVariant).ViCondition == iCondition);
       nTrials = length(VidxTrialRows);
       nAveragedTrials = floor(nTrials / c_nTrialsPerAverageForCPPOnset);
-      MTrialERPs = SObservations(iFilterVariant).SResponseERP.MERPs(VidxTrialRows, :);
-      VTrialRTs = SObservations(iFilterVariant).VResponseTime(VidxTrialRows);
-      VTrialThetaDotsAtResp = SObservations(iFilterVariant).VThetaDotAtResponse(VidxTrialRows);
+      MTrialERPs = SObservations(iObsFilterVariant).SResponseERP.MERPs(VidxTrialRows, :);
+      VTrialRTs = SObservations(iObsFilterVariant).VResponseTime(VidxTrialRows);
+      VTrialThetaDotsAtResp = SObservations(iObsFilterVariant).VThetaDotAtResponse(VidxTrialRows);
       % sort the data for this participant and condition on response time
       [VSortedRTs, VidxRTSorting] = sort(VTrialRTs);
       MRTSortedERPs = MTrialERPs(VidxRTSorting, :);
@@ -108,17 +123,22 @@ for iFilterVariant = 1:c_nFilterVariants
         % estimate the onset of the pre-decision positivity by finding the
         % last point where the averaged response-locked ERP was less than a
         % given fraction of the ERP at response
-        erpAtResponse = VAvResponseERP(idxResponseSample);
+        if iFilterVariant == 3
+          erpAtResponse = avERPAtResponse; % average at-response ERP across conditions
+        else
+          erpAtResponse = VAvResponseERP(idxResponseSample); % at-response ERP in this average response-locked ERP
+        end
         cppOnsetERPThreshold = c_cppOnsetERPFraction * erpAtResponse;
         idxCPPOnset = find(VAvResponseERP(1:idxResponseSample) < cppOnsetERPThreshold, 1, 'last');
         % only record an estimated onset for this averaged trial if one could
         % be found within the response-locked ERP data, and the ERP at
         % response was larger than a given threshold
-        if ~isempty(idxCPPOnset) && erpAtResponse > c_minERPAtResponse
+        if ~isempty(idxCPPOnset) && erpAtResponse > c_minERPAtResponse 
           axis([-1 0 -5 20])
           plot(c_VERPTimeStamp(idxCPPOnset:idxResponseSample), ...
             VAvResponseERP(idxCPPOnset:idxResponseSample), '-', 'Color', [1 1 1] * 0.8)
           plot(c_VERPTimeStamp(idxCPPOnset), VAvResponseERP(idxCPPOnset), 'm+')
+          plot(c_VERPTimeStamp(idxCPPOnset), cppOnsetERPThreshold, 'v', 'Color', [1 1 1] * 0.8)
           plot(c_VERPTimeStamp(idxResponseSample), VAvResponseERP(idxResponseSample), 'k+')
           VCPPRelOnsetTime(iAvTrial) = c_VERPTimeStamp(idxCPPOnset);
         end
@@ -202,10 +222,10 @@ for iFilterVariant = 1:c_nFilterVariants
   idxEarlySample = find(c_VERPTimeStamp >= c_probeTimeForCPPEffectSizeThreshold, 1, 'first');
   idxPeakSample = find(c_VERPTimeStamp >= 0, 1, 'first');
   for iParticipant = 1:c_nParticipants
-    VEarlyValues = SObservations(iFilterVariant).SResponseERP.MERPs(...
-      SObservations(iFilterVariant).ViDataSet == iParticipant, idxEarlySample);
-    VPeakValues = SObservations(iFilterVariant).SResponseERP.MERPs(...
-      SObservations(iFilterVariant).ViDataSet == iParticipant, idxPeakSample);
+    VEarlyValues = SObservations(iObsFilterVariant).SResponseERP.MERPs(...
+      SObservations(iObsFilterVariant).ViDataSet == iParticipant, idxEarlySample);
+    VPeakValues = SObservations(iObsFilterVariant).SResponseERP.MERPs(...
+      SObservations(iObsFilterVariant).ViDataSet == iParticipant, idxPeakSample);
     VpValues(iParticipant) = signrank(VEarlyValues, VPeakValues);
     VdValues(iParticipant) = CalculateCohensDForIndependentSamples(VEarlyValues, VPeakValues);
   end

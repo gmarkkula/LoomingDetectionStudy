@@ -85,7 +85,7 @@ c_VRTCDFXLim = [0.5 3.8];
 c_VRTCDFYLim = [-.1 1.1];
 
 c_VResponseERPXLim_ms = [-1200 500];
-c_VERPYLim = [-2 6];
+c_VERPYLim = [-2 7];
 % constants for response-locking
 c_responseERPMinTime = -1;
 c_responseERPMaxTime = 0.4;

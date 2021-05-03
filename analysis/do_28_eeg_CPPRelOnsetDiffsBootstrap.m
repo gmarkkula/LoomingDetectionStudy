@@ -46,13 +46,20 @@ for bFilterVariants = [false true]
   
   if bFilterVariants
     load([c_sAnalysisResultsPath c_sCPPOnsetFilterVariantsMATFileName])
-    nFilterVariants = 2;
+    nFilterVariants = 3;
+    sICAstr = 'without';
   else
     load([c_sAnalysisResultsPath c_sCPPOnsetMATFileName])
     nFilterVariants = 1;
+    sICAstr = 'with';
+    c_CsFilterVariants{1} = 'LPHP';
   end
   
   for iFilterVariant = 1:nFilterVariants
+    
+    fprintf(['\n\n*** Calculating for CPP onsets %s ocular artifacts removed,\n' ...
+      '*** using filtering and onset estimation method: %s\n\n'], ...
+      sICAstr, c_CsFilterVariants{iFilterVariant})
     
     VbIncluded = ismember(SCPPOnsetResults(iFilterVariant).ViDataSet, ...
       SCPPOnsetResults(iFilterVariant).ViIncludedParticipants) & ...
