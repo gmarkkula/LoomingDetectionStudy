@@ -52,7 +52,6 @@ c_nParticipants = length(CsParticipantIDs);
 
 
 %%
-c_cppOnsetERPFraction = 0.3;
 c_minERPAtResponse = 2;
 c_nPlotRows = 6;
 

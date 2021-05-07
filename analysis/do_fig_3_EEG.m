@@ -64,6 +64,10 @@ if c_bDoBasicInit
   % load data
   fprintf('Loading data...\n')
   % - EEG data across all electrodes
+  load([c_sAnalysisResultsPath c_sAllTrialDataFilterVariantsFileName])
+  SAllTrialData_FilterVariants = SAllTrialData;
+  c_iNoHPFilter = 2;
+  c_nFilterVariants = 2; % full filtering; no HP filtering
   load([c_sAnalysisResultsPath c_sAllTrialDataFileName])
   % -- model simulation results incl CPP onset predictions
   load([c_sAnalysisResultsPath c_sSimulationsForFigsMATFileName])
@@ -92,9 +96,9 @@ end
 
 figure(10)
 clf
-set(gcf, 'Position', [100 150 c_nFullWidthFigure_px 520])
+set(gcf, 'Position', [100 50 c_nFullWidthFigure_px 600])
 
-c_nSubplotRows = 4;
+c_nSubplotRows = 5;
 c_nSubplotCols = 3;
 
 
@@ -157,6 +161,8 @@ end % if c_bDoScalpMaps
 
 %% participant ERP plots
 
+c_MLightGray = .7 * [1 1 1];
+
 if c_bDoParticipantERPs
   
   %% get stimulus-locked and response-locked average ERPs, and do ANOVAs on
@@ -166,14 +172,25 @@ if c_bDoParticipantERPs
   % electrodes
   nStimulusLockedPlotSamples = size(SAllTrialData.MEEGERP, 2);
   MStimulusERP = NaN * ones(nEpochs, nStimulusLockedPlotSamples);
-  MResponseERP = NaN * ones(nEpochs, c_nResponseLockedPlotSamples);
-  for iEpoch = 1:nEpochs
-    MStimulusERP(iEpoch, :) = ...
-      squeeze(mean(SAllTrialData.MEEGERP(ViElectrodes, :, iEpoch), 1));
-    idxEpochResponseSample = SAllTrialData.VidxResponseERPSample(iEpoch);
-    MResponseERP(iEpoch, :) = squeeze(mean(SAllTrialData.MEEGERP(ViElectrodes, ...
-      idxEpochResponseSample + c_VidxDataRangeAroundResponse, iEpoch), 1));
-  end % iEpoch for loop
+  MResponseERP = NaN * ones(c_nFilterVariants, nEpochs, c_nResponseLockedPlotSamples);
+  for iFilterVariant = 1:c_nFilterVariants
+    switch iFilterVariant
+      case 1
+        MEEGERP = SAllTrialData.MEEGERP;
+      case 2
+        MEEGERP = squeeze(...
+          SAllTrialData_FilterVariants.MEEGERP(c_iNoHPFilter, :, :, :, :));
+    end
+    for iEpoch = 1:nEpochs
+      if iFilterVariant == 1
+        MStimulusERP(iEpoch, :) = ...
+          squeeze(mean(MEEGERP(ViElectrodes, :, iEpoch), 1));
+      end
+      idxEpochResponseSample = SAllTrialData.VidxResponseERPSample(iEpoch);
+      MResponseERP(iFilterVariant, iEpoch, :) = squeeze(mean(MEEGERP(ViElectrodes, ...
+        idxEpochResponseSample + c_VidxDataRangeAroundResponse, iEpoch), 1));
+    end % iEpoch for loop
+  end % iFilterVariant for loop
   
   
   % ANOVA
@@ -182,26 +199,28 @@ if c_bDoParticipantERPs
   CVPredictors = {SAllTrialData.ViStimulusID SAllTrialData.ViFinalIncludedParticipantCounter};
   c_ViRandomEffectPredictors = 2;
   c_CsPredictors = {'Condition' 'Participant'};
-  VConditionP = NaN * ones(c_nTests, 1);
+  VConditionP = NaN * ones(c_nFilterVariants, c_nTests);
   fprintf('Testing for difference in response-locked ERP between conditions')
-  for iTest = 1:length(c_VTestTimeStamps_ms)
-    
-    fprintf('.')
-    
-    testTime_ms = c_VTestTimeStamps_ms(iTest);
-    idxTestSample = find(c_VResponseLockedTimes_ms >= testTime_ms, 1, 'first');
-    VERPDataAtTestSample = MResponseERP(:, idxTestSample);
-    
-    [p, STable, SStats] = anovan(VERPDataAtTestSample, ...
-      CVPredictors, 'model', 2, 'random', c_ViRandomEffectPredictors, ...
-      'varnames', c_CsPredictors, 'display', 'off');
-    
-%     fprintf('t = %.0f ms:\n\tp(Condition) = %.3f\n\tp(Participant) = %.3f\n\tp(interaction) = %.3f\n', ...
-%       testTime_ms, p(1), p(2), p(3))
-
-    VConditionP(iTest) = p(1);
-    
-  end % iTest for loop
+  for iFilterVariant = 1:c_nFilterVariants
+    for iTest = 1:length(c_VTestTimeStamps_ms)
+      
+      fprintf('.')
+      
+      testTime_ms = c_VTestTimeStamps_ms(iTest);
+      idxTestSample = find(c_VResponseLockedTimes_ms >= testTime_ms, 1, 'first');
+      VERPDataAtTestSample = MResponseERP(iFilterVariant, :, idxTestSample);
+      
+      [p, STable, SStats] = anovan(VERPDataAtTestSample, ...
+        CVPredictors, 'model', 2, 'random', c_ViRandomEffectPredictors, ...
+        'varnames', c_CsPredictors, 'display', 'off');
+      
+      %     fprintf('t = %.0f ms:\n\tp(Condition) = %.3f\n\tp(Participant) = %.3f\n\tp(interaction) = %.3f\n', ...
+      %       testTime_ms, p(1), p(2), p(3))
+      
+      VConditionP(iFilterVariant, iTest) = p(1);
+      
+    end % iTest for loop
+  end % iFilterVariant for loop
   fprintf('\n')
   
   
@@ -212,6 +231,13 @@ if c_bDoParticipantERPs
     ViConditionEpochs = find(SAllTrialData.ViStimulusID == iCondition);
     
     for iLock = 1:2 % stimulus vs response-locked
+      
+      if iLock == 1
+        nFilterVariantsToPlot = 1;
+      else
+        nFilterVariantsToPlot = 2;
+      end
+      for iFilterVariant = 1:nFilterVariantsToPlot
       
       switch iLock
         case 1
@@ -225,13 +251,14 @@ if c_bDoParticipantERPs
           sLabel = 'response';
           VXLim = c_VResponseERPXLim_ms;
           VERPTimeStamp_ms = c_VResponseLockedTimes_ms;
-          VERPData = mean(MResponseERP(ViConditionEpochs, :));
-          MERPData(iCondition, :) = VERPData;
-          iSubplotRow = 1;
+          VERPData = mean(squeeze(MResponseERP(...
+            iFilterVariant, ViConditionEpochs, :)));
+%           MERPData(iCondition, :) = VERPData;
+          iSubplotRow = iFilterVariant;
           iSubplotCol = 2;
       end
       
-      VhParticipantERP(iLock) = ...
+      VhParticipantERP(iLock, iFilterVariant) = ...
         subplotGM(c_nSubplotRows, c_nSubplotCols, iSubplotRow, iSubplotCol);
       if iCondition == 1
         cla
@@ -246,7 +273,7 @@ if c_bDoParticipantERPs
         if iLock == 2
           % show the results of the ANOVAs
           VTestPlotY = -1.5 * ones(size(c_VTestTimeStamps_ms));
-          VTestPlotY(VConditionP > 0.05) = NaN;
+          VTestPlotY(squeeze(VConditionP(iFilterVariant, :)) > 0.05) = NaN;
           plot(c_VTestTimeStamps_ms, VTestPlotY, 'k.')
           if c_bHideAxes
             set(gca, 'XColor', 'none')
@@ -255,7 +282,11 @@ if c_bDoParticipantERPs
         
         set(gca, 'XLim', VXLim)
         set(gca, 'YLim', c_VERPYLim)
-        h = plot([0 0], get(gca, 'YLim'), 'k-', 'LineWidth', c_stdLineWidth/2);
+        h = plot([0 0], get(gca, 'YLim'), '-', 'LineWidth', c_stdLineWidth/2, ...
+          'Color', c_MLightGray);
+        uistack(h, 'bottom')
+        h = plot(get(gca, 'XLim'), [0 0], '-', 'LineWidth', c_stdLineWidth/2, ...
+          'Color', c_MLightGray);
         uistack(h, 'bottom')
         xlabel(sprintf('Time relative %s (ms)', sLabel), ...
           'FontSize', c_annotationFontSize, 'FontName', c_sFontName)
@@ -263,6 +294,7 @@ if c_bDoParticipantERPs
           'FontName', c_sFontName)
       end
       
+      end % iFilterVariant for loop
       
     end % iLock for loop
     
@@ -271,13 +303,13 @@ if c_bDoParticipantERPs
   
 end % if c_bDoParticipantERPs
 
-save([c_sAnalysisResultsPath c_sResponseLockedERPMATFileName], ...
-  'MERPData', 'VERPTimeStamp_ms')
+% save([c_sAnalysisResultsPath c_sResponseLockedERPMATFileName], ...
+%   'MERPData', 'VERPTimeStamp_ms')
 
 
 %% model response-locked ERPs
 
-hModelERP = subplotGM(c_nSubplotRows, c_nSubplotCols, 2, 2);
+hModelERP = subplotGM(c_nSubplotRows, c_nSubplotCols, 3, 2);
 cla
 set(gca, 'FontSize', c_stdFontSize, 'FontName', c_sFontName)
 hold on
@@ -294,14 +326,18 @@ xlabel('Time relative response (ms)')
 ylabel('E (-)')
 set(gca, 'XLim', c_VResponseERPXLim_ms)
 set(gca, 'YLim', [-.3 1.6])
-h = plot([0 0], get(gca, 'YLim'), 'k-', 'LineWidth', c_stdLineWidth/2);
+h = plot([0 0], get(gca, 'YLim'), '-', 'LineWidth', c_stdLineWidth/2, ...
+  'Color', c_MLightGray);
+uistack(h, 'bottom')
+h = plot(get(gca, 'XLim'), [0 0], '-', 'LineWidth', c_stdLineWidth/2, ...
+  'Color', c_MLightGray);
 uistack(h, 'bottom')
 
 
 
 %% pre-decision positivity onsets relative response
 
-hPDPRelOnset = subplotGM(c_nSubplotRows, c_nSubplotCols, 3, 2);
+hPDPRelOnset = subplotGM(c_nSubplotRows, c_nSubplotCols, 4, 2);
 cla
 set(gca, 'FontSize', c_stdFontSize, 'FontName', c_sFontName)
 hold on
@@ -410,7 +446,7 @@ end % iCondition for loop
 %% do the plotting
 
 
-hCDFs = subplotGM(c_nSubplotRows, c_nSubplotCols, 4, 2);
+hCDFs = subplotGM(c_nSubplotRows, c_nSubplotCols, 5, 2);
 cla
 set(gca, 'FontSize', c_stdFontSize, 'FontName', c_sFontName)
 hold on
@@ -593,40 +629,43 @@ end
 
 % B
 VhPanelLabels(end+1) = annotation('textbox',...
-  [0.03 0.24 0.07 0.12],...
+  [0.03 0.2 0.07 0.12],...
   'String', 'B', 'FontSize', c_panelLabelFontSize, 'FontName', c_sFontName, ...
   'FontWeight', 'bold', 'EdgeColor', 'none');
-VhParticipantERP(1).Position = [0.0718 0.0885 0.1973 0.1873];
+VhParticipantERP(1, 1).Position = [0.0718 0.0885 0.1973 0.1873];
 
-% C
+% C-E
+for i = 1:3
 VhPanelLabels(end+1) = annotation('textbox',...
-  [0.28 0.87 0.07 0.12],...
-  'String', 'C', 'FontSize', c_panelLabelFontSize, 'FontName', c_sFontName, ...
+  [0.28 0.87-0.2*(i-1) 0.07 0.12],...
+  'String', char(int8('C') + i - 1), 'FontSize', c_panelLabelFontSize, 'FontName', c_sFontName, ...
   'FontWeight', 'bold', 'EdgeColor', 'none');
-VhParticipantERP(2).Position = [0.3464 0.7392 0.2697 0.2000];
-hModelERP.Position = [0.3464 0.5065 0.2697 0.2000];
+end
+VhParticipantERP(2, 1).Position = [0.3464 0.81 0.2697 0.15];
+VhParticipantERP(2, 2).Position = [0.3464 0.61 0.2697 0.15];
+hModelERP.Position = [0.3464 0.41 0.2697 0.15];
 
-% D
+% F
 VhPanelLabels(end+1) = annotation('textbox',...
-  [0.39 0.24 0.07 0.12],...
-  'String', 'D', 'FontSize', c_panelLabelFontSize, 'FontName', c_sFontName, ...
+  [0.39 0.16 0.07 0.12],...
+  'String', 'F', 'FontSize', c_panelLabelFontSize, 'FontName', c_sFontName, ...
   'FontWeight', 'bold', 'EdgeColor', 'none');
-hPDPRelOnset.Position = [0.40 0.0885 0.2274 0.27];
+hPDPRelOnset.Position = [0.40 0.0885 0.2274 0.1873];
 
-% E
+% G
 VhPanelLabels(end+1) = annotation('textbox',...
   [0.68 0.87 0.07 0.12],...
-  'String', 'E', 'FontSize', c_panelLabelFontSize, 'FontName', c_sFontName, ...
+  'String', 'G', 'FontSize', c_panelLabelFontSize, 'FontName', c_sFontName, ...
   'FontWeight', 'bold', 'EdgeColor', 'none');
 hCDFs.Position = [0.74 0.7115 0.1806 0.2370];
 hCDFLegend.Position = [0.8745 0.7623 0.0836 0.0856];
 hCDFLegend.Box = 'off';
 
 
-% F
+% H
 VhPanelLabels(end+1) = annotation('textbox',...
   [0.68 0.48 0.07 0.12],...
-  'String', 'F', 'FontSize', c_panelLabelFontSize, 'FontName', c_sFontName, ...
+  'String', 'H', 'FontSize', c_panelLabelFontSize, 'FontName', c_sFontName, ...
   'FontWeight', 'bold', 'EdgeColor', 'none');
 for i = 1:2
   x = 0.73 + (i-1) * 0.10;
@@ -637,10 +676,10 @@ for i = 1:2
 end
 
 % condition legend
-hConditionLegend.Position = [0.2291    0.2465    0.1486    0.1458];
+hConditionLegend.Position = [0.2055 0.2167 0.1373 0.1290];
 
 
-% save EPS
+%% save EPS
 if c_bSaveEPS
   fprintf('Saving EPS...\n')
   SaveFigAsEPSPDF('Fig3.eps')
