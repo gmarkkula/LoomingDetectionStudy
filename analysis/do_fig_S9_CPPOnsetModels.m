@@ -191,7 +191,12 @@ for iFilterVariant = 1:2 % main approach in paper vs without HP filtering
       ylabel(sprintf('CDF\n'), 'FontSize', c_annotationFontSize, ...
         'FontName', c_sFontName)
       VAxPosition = get(gca, 'Position');
-      sLabel = char(int8('A') + iFilterVariant - 1);
+      if iFilterVariant == 1
+        sLabel = '(i)';
+      else
+        sLabel = '(ii)';
+      end
+      %       sLabel = char(int8('A') + iFilterVariant - 1);
       annotation('textbox',...
         [VAxPosition(1) - 0.07  VAxPosition(2) + VAxPosition(4) - 0.03  0.07 0.12],...
         'String', sLabel, 'FontSize', c_panelLabelFontSize, 'FontName', c_sFontName, ...

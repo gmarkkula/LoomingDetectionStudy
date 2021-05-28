@@ -286,7 +286,19 @@ while iPanel <= 5
     x = x + 0.02;
   end
   y = VPanelPos(2) + VPanelPos(4) - 0.05;
-  sLabel = char(int8('A') + iPanel - 1);
+  switch iPanel
+    case 1
+      sLabel = '(i)';
+    case 2
+      sLabel = '(ii)';
+    case 3
+      sLabel = '(iii)';
+    case 4
+      sLabel = '(iv)';
+    case 5
+      sLabel = '(v)';
+  end
+  %sLabel = char(int8('A') + iPanel - 1);
   annotation('textbox',...
     [x y 0.07 0.12],...
     'String', sLabel, 'FontSize', c_panelLabelFontSize, 'FontName', c_sFontName, ...

@@ -259,39 +259,36 @@ end % iModelComparison for loop
 
 %% panel labels and positions
 
-% remove any existing panel labels (if tweaking)
-if exist('VhPanelLabels', 'var')
-  try
-    delete(VhPanelLabels)
+if false
+  
+  % remove any existing panel labels (if tweaking)
+  if exist('VhPanelLabels', 'var')
+    try
+      delete(VhPanelLabels)
+    end
   end
-end
-VhPanelLabels = [];
-
-% A
-VhPanelLabels(end+1) = annotation('textbox',...
-  [0.01 0.89 0.0272727267308669 0.130434780161162],...
-  'String', 'A', 'FontSize', c_panelLabelFontSize, 'FontWeight', 'bold', ...
-  'FontName', c_sFontName, 'EdgeColor', 'none');
-for i = 1:3
-  x = 0.07 + (i-1) * 0.20;
-  VhCDFs(i).Position = [x 0.3897 0.17 0.5208];
-end
-hLegend.Position = [0.5900 0.4887 0.0842 0.2150];
-
-
-% B
-VhPanelLabels(end+1) = annotation('textbox',...
-  [0.70 0.89 0.0272727267308669 0.130434780161162],...
-  'String', 'B', 'FontSize', c_panelLabelFontSize, 'FontWeight', 'bold', ...
-  'FontName', c_sFontName, 'EdgeColor', 'none');
-for i = 1:2
-  x = 0.77 + (i-1) * 0.1;
-  VhDeltaAICs(i).Position = [x 0.1148 0.10 0.8150];
-end
-
-
-% save EPS
-if c_bSaveEPS
-  fprintf('Saving EPS...\n')
-  SaveFigAsEPSPDF('FigS3.eps')
+  VhPanelLabels = [];
+  
+  % A
+  VhPanelLabels(end+1) = annotation('textbox',...
+    [0.01 0.89 0.0272727267308669 0.130434780161162],...
+    'String', 'A', 'FontSize', c_panelLabelFontSize, 'FontWeight', 'bold', ...
+    'FontName', c_sFontName, 'EdgeColor', 'none');
+  for i = 1:3
+    x = 0.07 + (i-1) * 0.20;
+    VhCDFs(i).Position = [x 0.3897 0.17 0.5208];
+  end
+  hLegend.Position = [0.5900 0.4887 0.0842 0.2150];
+  
+  
+  % B
+  VhPanelLabels(end+1) = annotation('textbox',...
+    [0.70 0.89 0.0272727267308669 0.130434780161162],...
+    'String', 'B', 'FontSize', c_panelLabelFontSize, 'FontWeight', 'bold', ...
+    'FontName', c_sFontName, 'EdgeColor', 'none');
+  for i = 1:2
+    x = 0.77 + (i-1) * 0.1;
+    VhDeltaAICs(i).Position = [x 0.1148 0.10 0.8150];
+  end
+  
 end
