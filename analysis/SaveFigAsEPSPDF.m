@@ -42,7 +42,7 @@ set(gcf, 'PaperPositionMode', 'auto')
 
 sSuffix = sFileName(end-3:end);
 if strcmp(sSuffix, '.eps')
-  print('-depsc', sFileName)
+  print('-depsc', sFileName, '-r600')
 elseif strcmp(sSuffix, '.pdf')
   print('-dpdf', sFileName)
 else
